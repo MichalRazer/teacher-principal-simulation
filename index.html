@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>סימולטור שיחות מנהל-מורה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .teacher-message {
+            background-color: #e3f2fd;
+            margin-right: 20px;
+        }
+        .principal-message {
+            background-color: #f5f5f5;
+            margin-left: 20px;
+        }
+        .body-language {
+            font-style: italic;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .input-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+        .counter {
+            color: #666;
+            text-align: left;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            display: none;
+        }
+        .instructions {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h3>הוראות משחק התפקידים:</h3>
+        <p>אתה בתפקיד מנהל בית הספר המנהל שיחה עם המורה חיים.</p>
+        <p>המטרה: לנהל שיחה שמשקפת את הקושי התפקודי אך לא נוטשת את המורה.</p>
+        <p>השיחה תסתיים אחרי 20 הודעות או כשתכתוב "סיום" או "משוב".</p>
+    </div>
+
+    <div class="chat-container">
+        <h2>שיחה עם המורה חיים</h2>
+        <div id="chat-messages"></div>
+        <div class="input-container">
+            <input type="text" id="principal-input" placeholder="הקלד את תגובתך כמנהל...">
+            <button onclick="sendMessage()">שלח</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <script>
+        class ConversationSimulator {
+            constructor() {
+                this.messageCount = 0;
+                this.maxMessages = 20;
+                this.isActive = false;
+                
+                this.responseTemplates = [
+                    "בבית הספר אין חוקים ברורים",
+                    "אין תקנון - אז מה מצפים",
+                    "אתה מאשים אותי? אני מחנך",
+                    "אין לי כוח לכל התלונות האלה. אתם לא מבינים מה זה להיות מורה היום",
+                    "התלמידים לא מכבדים, אין משמעת. זה לא אני, זה המערכת",
+                    "מה אתה רוצה ממני? אני מגיע כל יום, עושה את העבודה שלי",
+                    "ההורים חושבים שהם יודעים הכל. שיבואו הם ללמד",
+                    "תראה, יש לי גם חיים בבית. אני לא יכול להיות זמין 24/7",
+                    "פעם היה פה סדר, היום הכל מבולגן. אין גיבוי מההנהלה",
+                    "אתה יודע כמה שנים אני מלמד? אל תגיד לי איך לעשות את העבודה שלי"
+                ];
+
+                this.bodyLanguages = [
+                    "מסיט מבט",
+                    "מתופף באצבעות על השולחן",
+                    "נאנח בכבדות",
+                    "מביט בשעון",
+                    "משפיל מבט",
+                    "מתכווץ בכיסא"
+                ];
+            }
+
+            start() {
+                this.isActive = true;
+                this.messageCount = 0;
+                return this.addMessage("שלום, אני מבין שרצית לדבר איתי?", true);
+            }
+
+            handleMessage(message) {
+                if (!this.isActive) return false;
+
+                this.messageCount++;
+                
+                if (this.messageCount >= this.maxMessages || 
+                    message.toLowerCase().includes("משוב") || 
+                    message.toLowerCase().includes("סיום")) {
+                    this.endSimulation();
+                    return false;
+                }
+
+                const response = this.responseTemplates[Math.floor(Math.random() * this.responseTemplates.length)];
+                const bodyLanguage = this.bodyLanguages[Math.floor(Math.random() * this.bodyLanguages.length)];
+                
+                setTimeout(() => {
+                    this.addMessage(response, true, bodyLanguage);
+                }, 1000);
+
+                return true;
+            }
+
+            addMessage(text, isTeacher = false, bodyLanguage = "") {
+                const messagesDiv = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isTeacher ? 'teacher-message' : 'principal-message'}`;
+                
+                messageDiv.innerHTML = `
+                    <div>${text}</div>
+                    ${bodyLanguage ? `<div class="body-language">[${bodyLanguage}]</div>` : ''}
+                    <div class="counter">${this.messageCount}/${this.maxMessages}</div>
+                `;
+                
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            endSimulation() {
+                this.isActive = false;
+                const feedback = document.getElementById('feedback');
+                feedback.style.display = 'block';
+                feedback.innerHTML = `
+                    <h3>משוב על השיחה:</h3>
+                    <h4>הצבת גבולות:</h4>
+                    <p>• חשוב להציב גבולות ברורים תוך שמירה על כבוד המורה</p>
+                    <p>• יש להגדיר ציפיות ברורות לגבי התנהלות בכיתה</p>
+                    <h4>אמפתיה ותמיכה:</h4>
+                    <p>• חשוב להקשיב ולהבין את הקשיים של המורה</p>
+                    <p>• יש לספק תמיכה מקצועית ורגשית תוך שמירה על גבולות</p>
+                    <h4>המלצות להמשך:</h4>
+                    <p>• קביעת פגישות מעקב קבועות</p>
+                    <p>• בניית תכנית עבודה משותפת</p>
+                    <p>• הצעת כלים וסיוע מקצועי</p>
+                `;
+            }
+        }
+
+        const simulator = new ConversationSimulator();
+
+        function sendMessage() {
+            const input = document.getElementById('principal-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                simulator.addMessage(message, false);
+                if (simulator.handleMessage(message)) {
+                    input.value = '';
+                }
+            }
+        }
+
+        // Handle Enter key
+        document.getElementById('principal-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Start simulation
+        simulator.start();
+    </script>
+</body>
+</html>
